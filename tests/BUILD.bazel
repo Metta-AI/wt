@@ -1,0 +1,19 @@
+load("//bazel:pyproject.bzl", "pyproject_test")
+
+# Tests under tests/commands/ shell out to the installed `wt` console
+# script via subprocess (see softmaxwt.test_support.helpers.wt_run). The
+# bazel runfiles tree doesn't put `wt` on PATH; tagged `manual` so they
+# stay buildable + explicitly runnable but out of `//...` until a
+# py_binary CLI lands and the helper learns to find it.
+pyproject_test(
+    known_broken = [
+        "commands_test_attach",
+        "commands_test_create",
+        "commands_test_destroy",
+        "commands_test_gc",
+        "commands_test_ls",
+        "commands_test_open",
+        "commands_test_self_destroy",
+    ],
+    typecheck = False,
+)

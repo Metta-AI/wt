@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools==80.9.0", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "softmax-wt"
+version = "0.1.0"
+description = "CLI wrapper for git worktrees + sandboxed environments"
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = ["click>=8.1", "pydantic>=2.0", "pyyaml>=6.0", "rich>=13.0", "typer>=0.15.0"]
+
+# A `test` extra (not a PEP-735 `[dependency-groups]`) so the bazel resolver
+# wires pytest into the tests target — see bazel/update_python_deps.py's
+# _TEST_EXTRA_NAMES. The root workspace supplies pytest for `uv run metta pytest`.
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+wt = "softmaxwt.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["softmaxwt*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

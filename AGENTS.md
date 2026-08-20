@@ -1,0 +1,60 @@
+# AGENTS.md — wt
+
+CLI for isolated git worktree sessions (`wt` entry point). User docs in
+`README.md`, architecture in `DESIGN.md`, work queue in `TODO.md`
+(monorepo-only). Pure-Python package; minimal deps.
+
+This directory is mirrored verbatim to the public
+[Metta-AI/wt](https://github.com/Metta-AI/wt) repo — see `copy.bara.sky` here;
+development happens in the Softmax monorepo.
+Keep docs and commands monorepo-agnostic: they must make sense in both places.
+Only `BUILD.bazel`, `TODO.md`, and `copy.bara.sky` are excluded from the
+mirror.
+
+## Tests & lint
+
+```bash
+# From this directory; works in the monorepo and in the mirror.
+uv run --extra test pytest tests -v
+```
+
+In the Softmax monorepo, `uv run metta pytest packages/wt/tests -v` and
+`uv run metta lint --fix packages/wt` (shared ruff config) work too.
+
+Tests run the real `wt` CLI as a subprocess against a throwaway git repo (see
+`tests/conftest.py`); `XDG_CONFIG_HOME` is pointed at the test dir so your real
+`~/.config/wt` is never read, and `SHELL=/usr/bin/true` makes inplace execs
+return harmlessly.
+
+## Source layout
+
+- `command/` — one module per CLI command, self-registering on import (wired in
+  `cli.py`).
+- `opener/` — how a worktree is surfaced (inplace/cmux/zellij/noop...); registry +
+  `Opener` ABC in `common.py`.
+- `isolation/` — sandbox backends (raw/nono); same registry shape as opener.
+- `config.py` — profiles, YAML config, `resolve_profile` precedence.
+- `graphite.py` — reads graphite's data.
+- `worktree.py` — `git` subprocess wrappers and parsing.
+
+## Gotchas
+
+- **Never run mutating cmux commands during development** without the user's
+  explicit go-ahead — you can hang or crash their running terminal. In
+  particular do not reintroduce `cmux --layout`; see `LESSONS.md`.
+- The cmux opener only scrapes state from `--json` commands; mutating commands'
+  stdout is not a stable interface.
+- `wt destroy` must survive root-owned/read-only files left by bazel builds
+  (`_force_remove_dir`); there's a regression test for it.
+
+## Debugging nono sandbox denials
+
+When a command fails inside the `nono` isolation mode: `nono why --path <p> --op
+read|write` (or `--host`/`--port`) explains a denial; `nono learn -- <cmd>`
+traces what a command actually accesses (needs `sudo` on macOS); `nono audit
+list --recent 5` reviews past sessions; `--dry-run` previews grants; `-v/-vv`
+for detail. Sensitive paths (`~/.ssh`, `~/.aws`, shell dotfiles, …) are always
+blocked regardless of flags. For profile authoring, run `nono profile guide`.
+The sandbox profile name comes from `$WT_NONO_PROFILE` (`isolation/nono.py`);
+nono mode refuses to run without it. In the Softmax monorepo, `metta install
+nono` installs nono plus the `metta-cc` profile — set `WT_NONO_PROFILE=metta-cc`.
