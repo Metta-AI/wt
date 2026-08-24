@@ -1,25 +1,19 @@
 # AGENTS.md — wt
 
 CLI for isolated git worktree sessions (`wt` entry point). User docs in
-`README.md`, architecture in `DESIGN.md`, work queue in `TODO.md`
-(monorepo-only). Pure-Python package; minimal deps.
+`README.md`, architecture in `DESIGN.md`. Pure-Python package; minimal deps.
 
-This directory is mirrored verbatim to the public
-[Metta-AI/wt](https://github.com/Metta-AI/wt) repo — see `copy.bara.sky` here;
-development happens in the Softmax monorepo.
-Keep docs and commands monorepo-agnostic: they must make sense in both places.
-Only `BUILD.bazel`, `TODO.md`, and `copy.bara.sky` are excluded from the
-mirror.
+This directory is mirrored to the public
+[Metta-AI/wt](https://github.com/Metta-AI/wt) repo; development happens in the
+Softmax monorepo.
 
 ## Tests & lint
 
 ```bash
-# From this directory; works in the monorepo and in the mirror.
+# From this directory.
 uv run --extra test pytest tests -v
 ```
 
-In the Softmax monorepo, `uv run metta pytest packages/wt/tests -v` and
-`uv run metta lint --fix packages/wt` (shared ruff config) work too.
 
 Tests run the real `wt` CLI as a subprocess against a throwaway git repo (see
 `tests/conftest.py`); `XDG_CONFIG_HOME` is pointed at the test dir so your real
@@ -56,5 +50,5 @@ list --recent 5` reviews past sessions; `--dry-run` previews grants; `-v/-vv`
 for detail. Sensitive paths (`~/.ssh`, `~/.aws`, shell dotfiles, …) are always
 blocked regardless of flags. For profile authoring, run `nono profile guide`.
 The sandbox profile name comes from `$WT_NONO_PROFILE` (`isolation/nono.py`);
-nono mode refuses to run without it. In the Softmax monorepo, `metta install
-nono` installs nono plus the `metta-cc` profile — set `WT_NONO_PROFILE=metta-cc`.
+nono mode refuses to run without it.
+
