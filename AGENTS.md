@@ -5,7 +5,8 @@ CLI for isolated git worktree sessions (`wt` entry point). User docs in
 
 This directory is mirrored to the public
 [Metta-AI/wt](https://github.com/Metta-AI/wt) repo; development happens in the
-Softmax monorepo.
+Softmax monorepo. Pull requests on the mirror are welcome; they are applied to
+the monorepo and close once the change lands.
 
 ## Tests & lint
 
